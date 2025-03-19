@@ -29,6 +29,7 @@ while running:
     screen.fill('black')
     font1 = pygame.font.SysFont(None, 70)
     if gamescreen == 'menu':
+        screen.blit(font1.render('Candy Pop!', True, "white"), (217, 50))
         #newgame
         pygame.draw.rect(screen,'white',(180,160,360,80),5)
         screen.blit(font1.render('New Game', True, "white"), (230, 177))
