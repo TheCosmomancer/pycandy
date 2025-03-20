@@ -7,6 +7,7 @@ screen = pygame.display.set_mode((720, 720))
 clock = pygame.time.Clock()
 running = True
 gamescreen = 'menu'
+gamephasephase = 0
 satr = ''
 soton = ''
 inp = ''
@@ -36,29 +37,36 @@ while running:
     elif gamescreen == 'newgame':
         if mouse[0] == True:
             if 180<=mousepos[0]<=540 and 480<=mousepos[1]<=560:
-                if satr == '' and held == False:
+                if gamephasephase == 0 and held == False:
                     satr = int(inp)
                     inp =''
-                    held = True
-                elif soton == '' and not held:
+                    gamephasephase = 1
+                elif gamephasephase == 1 and not held:
                     soton = int(inp)
                     inp = ''
-                elif empty == set() and not held:
+                    gamephasephase = 2
+                elif gamephasephase == 2 and not held:
                     empty = tempset
                     tempset = set()
                     inp = ''
-                elif protected == set() and not held:
+                    gamephasephase = 3
+                elif gamephasephase == 3 and not held:
                     protected = tempset
                     tempset = set()
                     inp = ''
-                else:
+                    gamephasephase = 4
+                elif gamephasephase == 4 and not held:
                     refills = int(inp)
                     inp = ''
                     gamescreen = 'gameprep'
-            elif 180<=mousepos[0]<=540 and 330<=mousepos[1]<=410 and soton != '' and protected == set():
+                    gamephasephase = 0
+            elif 180<=mousepos[0]<=540 and 330<=mousepos[1]<=410 and (gamephasephase == 2 or gamephasephase == 3) and not held:
                 inp = inp.split(',')
-                if inp[0] <= satr and inp[1] <= soton:
-                    tempset.add((inp[0],inp[1]))
+                inp[0] = int(inp[0])
+                inp[1] = int(inp[1])
+                if 0 < int(inp[0]) <= satr and 0 < int(inp[1]) <= soton:
+                    tempset.add((inp[0]-1,inp[1]-1))
+                inp = ''
             held = True
         elif keys[pygame.K_0] or keys[pygame.K_KP0]:
             if not held:
@@ -100,6 +108,10 @@ while running:
             if not held:
                 inp += '9'
             held = True
+        elif keys[pygame.K_COMMA]:
+            if not held:
+                inp += ','
+            held = True
         elif keys[pygame.K_BACKSPACE]:
             if not held and len(inp) > 0:
                 temp = ''
@@ -112,12 +124,12 @@ while running:
     elif gamescreen == 'gameprep':
         for i in range(satr):
             gamemap.append(['generated' for j in range(soton)])
-            for i in range(satr):
-                for j in range(soton):
-                    if (i,j) not in empty:
-                        gamemap[i][j] = random.choice(candies)
-                    else:
-                        gamemap[i][j] = 'blocked'
+        for i in range(satr):
+            for j in range(soton):
+                if (i,j) not in empty:
+                    gamemap[i][j] = random.choice(candies)
+                else:
+                    gamemap[i][j] = 'blocked'
     # fill the screen with a color to wipe away anything from last frame
     screen.fill('black')
     font1 = pygame.font.SysFont(None, 70)
@@ -134,23 +146,23 @@ while running:
         pygame.draw.rect(screen, 'grey', (180, 480, 360, 80), 5)
         screen.blit(font1.render('Exit', True, "white"), (312, 497))
     if gamescreen == 'newgame':
-        if satr == '':
+        if gamephasephase == 0:
             screen.blit(font1.render('How many rows?', True, "white"), (160, 150))
-        elif soton  == '':
+        elif gamephasephase == 1:
             screen.blit(font1.render('How many colomns?', True, "white"), (160, 150))
-        elif empty == set():
+        elif gamephasephase == 2:
             screen.blit(font2.render('what spaces should be blocked ?', True, "white"), (80, 150))
             pygame.draw.rect(screen, 'grey', (180, 330, 360, 80), 5)
             screen.blit(font1.render('Add', True, "white"), (310, 347))
-        elif protected == set():
+        elif gamephasephase == 3:
             screen.blit(font2.render('what spaces should be protected ?', True, "white"), (80, 150))
             pygame.draw.rect(screen, 'grey', (180, 330, 360, 80), 5)
             screen.blit(font1.render('Add', True, "white"), (310, 347))
-        else:
+        elif gamephasephase == 4:
             screen.blit(font1.render('how many fill-in candies ?', True, "white"), (60, 150))
-        if satr == '' or soton == '' or (empty != set() and protected != set()):
+        if gamephasephase == 0 or gamephasephase == 1 or gamephasephase == 4:
             screen.blit(font1.render(inp, True, "white"), (245, 200))
-        elif empty == set() or protected == set():
+        elif gamephasephase == 2 or gamephasephase == 3:
             screen.blit(font1.render(f'({inp})', True, "white"), (245, 200))
         pygame.draw.rect(screen, 'grey', (180, 480, 360, 80), 5)
         screen.blit(font1.render('Confirm', True, "white"), (263, 497))
