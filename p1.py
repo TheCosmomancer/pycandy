@@ -57,6 +57,8 @@ def main():
                         inp = ''
                         gamephasephase = 4
                     elif gamephasephase == 4 and not held:
+                        if inp == '':
+                            inp = '0'
                         refills = int(inp)
                         inp = ''
                         gamescreen = 'gameprep'
@@ -134,6 +136,8 @@ def main():
             amodimult = 720/satr
             ofoghimult = 600/soton
             gamescreen = 'game'
+        elif gamescreen == 'game':
+            ...
         # fill the screen with a color to wipe away anything from last frame
         screen.fill('black')
         font1 = pygame.font.SysFont(None, 70)
@@ -202,10 +206,73 @@ def main():
         dt = clock.tick(60) / 1000
 
     pygame.quit()
-def viableswap(i,j):
-    ...
-def popcandy(i,j):
-    ...
-#game probs crashes with no empty/protected
-#game also crashes on first input on the  refills line
-#probs need to add a stage tracker akin to gamephasephase
+def viableswap(gamemap,i,j):
+    for one , two , three in [[-2,-1,0],[-1,0,1],[0,1,2]]:
+        try:
+            if (gamemap[i+one][j] == gamemap[i+two][j] and gamemap[i+one][j] == gamemap[i+three][j]):
+                return 'i'
+            elif (gamemap[i][j+one] == gamemap[i][j+two] and gamemap[i][j+one] == gamemap[i][j+three]):
+                return 'j'
+        except:
+            pass
+    return False
+def popcandy(gamemap,i,j,returned,satr,soton):
+    color = gamemap[i][j]
+    explored = [[i,j]]
+    if returned == 'i':
+        higher = i
+        lower = i
+    elif returned == 'j':
+        higher = j
+        lower = j
+    else:
+        raise ValueError('unviable candy was given to popcandy')
+    if returned == 'i':
+        while higher != False and higher <satr-1:
+            if gamemap[i+1][j] == color:
+                higher = i+1
+                explored.append([i+1,j])
+            else:
+                higher = False
+        while lower != False  and 0 < lower:
+            if gamemap[i-1][j] == color:
+                lower = i-1
+                explored.append([i-1,j])
+            else:
+                lower = False
+    else:
+        while higher != False and higher <soton-1:
+            if gamemap[i][j+1] == color:
+                higher = j+1
+                explored.append([i,j+1])
+            else:
+                higher = False
+        while lower != False  and 0 < lower:
+            if gamemap[i][j-1] == color:
+                lower = j-1
+                explored.append([i,j-1])
+            else:
+                lower = False
+    if returned == 'i':
+        for one , two in [[-2,-1],[-1,1],[1,2]]:
+            try:
+                if gamemap[higher][j+one] == color and gamemap[higher][j+two] == color:
+                    explored.append([higher,j+one])
+                    explored.append([higher,j+two])
+                    break
+            except:
+                pass
+    elif returned == 'j':
+        for one , two in [[-2,-1],[-1,1],[1,2]]:
+            try:
+                if gamemap[i+one][higher] == color and gamemap[i+two][higher] == color:
+                    explored.append([i+one,higher])
+                    explored.append([i+two,higher])
+                    break
+            except:
+                pass
+    for k,l in explored:
+        gamemap[k][l] = 'poped'
+    return gamemap
+if __name__ == '__main__':
+    main()
