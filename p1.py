@@ -18,6 +18,7 @@ def main():
     protected = set()
     tempset = set()
     candies = ['r','o','y','g','b','p'] #for red, orange, yellow,green,blue and purple respetively
+    # pint , teal and white
     held = False
     while running:
         # poll for events
@@ -133,6 +134,17 @@ def main():
                         gamemap[i][j] = random.choice(candies)
                     else:
                         gamemap[i][j] = 'blocked'
+            flag = True
+            while flag:
+                flag = False
+                for i in range(satr):
+                    for j in range(soton):
+                        if gamemap[i][j] == 'poped':
+                            gamemap[i][j] = random.choice(candies)
+                        returned = viableswap(gamemap,i,j)
+                        if returned != False:
+                            popcandy(gamemap,i,j,returned, satr, soton,makecandies=False)
+                            flag = True
             amodimult = 720/satr
             ofoghimult = 600/soton
             gamescreen = 'game'
@@ -216,7 +228,8 @@ def viableswap(gamemap,i,j):
         except:
             pass
     return False
-def popcandy(gamemap,i,j,returned,satr,soton):
+def popcandy(gamemap,i,j,returned,satr,soton,makecandies = True):
+    lort = False
     color = gamemap[i][j]
     explored = [[i,j]]
     if returned == 'i':
@@ -259,6 +272,7 @@ def popcandy(gamemap,i,j,returned,satr,soton):
                 if gamemap[higher][j+one] == color and gamemap[higher][j+two] == color:
                     explored.append([higher,j+one])
                     explored.append([higher,j+two])
+                    lort = True
                     break
             except:
                 pass
@@ -268,11 +282,20 @@ def popcandy(gamemap,i,j,returned,satr,soton):
                 if gamemap[i+one][higher] == color and gamemap[i+two][higher] == color:
                     explored.append([i+one,higher])
                     explored.append([i+two,higher])
+                    lort = True
                     break
             except:
                 pass
     for k,l in explored:
         gamemap[k][l] = 'poped'
+    if makecandies:
+        target = random.choice(explored)
+        if lort:
+            gamemap[target[0]][target[1]] = 'bomb'
+        elif len(explored) >= 5:
+            gamemap[target[0]][target[1]] = 'rainbow'
+        elif len(explored) == 4:
+            gamemap[target[0]][target[1]] = 'satrsoton'
     return gamemap
 if __name__ == '__main__':
     main()
