@@ -1,4 +1,6 @@
 #Example file showing a circle moving on screen
+from random import choice
+
 import pygame
 import random
 def main():
@@ -62,8 +64,8 @@ def main():
                             inp = '0'
                         refills = int(inp)
                         inp = ''
-                        gamescreen = 'gameprep'
                         gamephasephase = 0
+                        gamescreen = 'gameprep'
                 elif 180<=mousepos[0]<=540 and 330<=mousepos[1]<=410 and (gamephasephase == 2 or gamephasephase == 3) and not held:
                     inp = inp.split(',')
                     inp[0] = int(inp[0])
@@ -134,22 +136,57 @@ def main():
                         gamemap[i][j] = random.choice(candies)
                     else:
                         gamemap[i][j] = 'blocked'
-            flag = True
-            while flag:
-                flag = False
-                for i in range(satr):
-                    for j in range(soton):
-                        if gamemap[i][j] == 'poped':
-                            gamemap[i][j] = random.choice(candies)
-                        returned = viableswap(gamemap,i,j)
-                        if returned != False:
-                            popcandy(gamemap,i,j,returned, satr, soton,makecandies=False)
-                            flag = True
-            amodimult = 720/satr
-            ofoghimult = 600/soton
+            for i in range(satr):
+                for j in range(soton):
+                    if (i,j) not in empty:
+                        gamemap[i][j] = candyfill(gamemap,i,j)
+            amodimult = 720//satr
+            ofoghimult = 600//soton
+            selected1 = []
+            selected2 = []
             gamescreen = 'game'
         elif gamescreen == 'game':
-            ...
+            if mouse[0] == True and 0<=gamephasephase<=1 :
+                if mousepos[0] >= 120 and not held :
+                    if gamephasephase == 0:
+                        selected1 = [(mousepos[1])//amodimult,(mousepos[0]-120)//ofoghimult]
+                        gamephasephase = 1
+                    else:
+                        selected2 = [(mousepos[1])//amodimult,(mousepos[0]-120)//ofoghimult]
+                        gamephasephase = 2
+            elif gamephasephase == 2:
+                difi = abs(selected1[0]-selected2[0])
+                difj = abs(selected1[1]-selected2[1])
+                if (difi == 0 and difj == 1) or (difi == 1 and difj == 0):
+                    copygamemap = gamemap
+                    temp = copygamemap[selected1[0]][selected1[1]]
+                    copygamemap[selected1[0]][selected1[1]] = copygamemap[selected2[0]][selected2[1]]
+                    copygamemap[selected2[0]][selected2[1]] = temp
+                    flag = False
+                    returned1 = viableswap(copygamemap, selected2[0], selected2[1],satr,soton)
+                    returned2 = viableswap(copygamemap, selected1[0], selected1[1],satr,soton)
+                    """"if (copygamemap[selected1[0]][selected1[1]] == 'satrsoton' or copygamemap[selected1[0]][selected1[1]] == 'bomb' or copygamemap[selected1[0]][selected1[1]] == 'rainbow' or returned1 != False) and (copygamemap[selected2[0]][selected2[1]] == 'bomb' or copygamemap[selected2[0]][selected2[1]] == 'rainbow' or copygamemap[selected2[0]][selected2[1]] == 'satrsoton' or returned2 != False):
+                        flag = '12'
+                    elif (copygamemap[selected1[0]][selected1[1]] == 'satrsoton' or copygamemap[selected1[0]][selected1[1]] == 'bomb' or copygamemap[selected1[0]][selected1[1]] == 'rainbow' or returned1 != False):
+                        flag = '1'
+                    elif (copygamemap[selected2[0]][selected2[1]] == 'bomb' or copygamemap[selected2[0]][selected2[1]] == 'rainbow' or copygamemap[selected2[0]][selected2[1]] == 'satrsoton' or returned2 != False):
+                        flag = '2'
+                    if flag == '12':
+                        copygamemap = popcandy(copygamemap, i, j, returned1, satr, soton)
+                        copygamemap = popcandy(copygamemap, i, j, returned2, satr, soton)
+                    elif flag == '1':
+                        copygamemap = popcandy(copygamemap, i, j, returned1, satr, soton)
+                    elif flag == '2':
+                        copygamemap = popcandy(copygamemap, i, j, returned2, satr, soton)"""
+                    if returned1 != False or returned2 != False:
+                        gamemap = copygamemap
+                selected1 = []
+                selected2 = []
+                gamephasephase = 0
+            if mouse[0] == True:
+                   held = True
+            elif mouse[0] == False:
+                held = False
         # fill the screen with a color to wipe away anything from last frame
         screen.fill('black')
         font1 = pygame.font.SysFont(None, 70)
@@ -191,6 +228,8 @@ def main():
                 r = amodimult/2
             else:
                 r = ofoghimult/2
+            if selected1 != []:
+                pygame.draw.rect(screen,'white',[(selected1[1]*ofoghimult)+120,selected1[0]*amodimult,ofoghimult,amodimult],500)
             for i in range(satr):
                 for j in range(soton):
                     if gamemap[i][j] == 'r':
@@ -208,7 +247,8 @@ def main():
                     else:
                         color = 'black'
                     pygame.draw.circle(screen,color,(120 + ((j+0.5)*ofoghimult),(i+0.5)*amodimult),r,500)
-
+            screen.blit(font1.render(f'({selected1})', True, "white"), (245, 200))
+            screen.blit(font1.render(f'({selected2})', True, "white"), (245, 400))
         # flip() the display to put your work on screen
         pygame.display.flip()
 
@@ -218,84 +258,110 @@ def main():
         dt = clock.tick(60) / 1000
 
     pygame.quit()
-def viableswap(gamemap,i,j):
-    for one , two , three in [[-2,-1,0],[-1,0,1],[0,1,2]]:
-        try:
-            if (gamemap[i+one][j] == gamemap[i+two][j] and gamemap[i+one][j] == gamemap[i+three][j]):
+def viableswap(gamemap,i,j,satr,soton):
+    lis = [[-2,-1,0],[-1,0,1],[0,1,2]]
+    for r in range(3):
+        one, two, three = lis[r]
+        if i+one >=0 and i+three <satr:
+            if (gamemap[i+one][j] == gamemap[i+two][j] and gamemap[i+two][j] == gamemap[i+three][j]):
                 return 'i'
-            elif (gamemap[i][j+one] == gamemap[i][j+two] and gamemap[i][j+one] == gamemap[i][j+three]):
+        if j+one >=0 and j+three <soton:
+            if (gamemap[i][j+one] == gamemap[i][j+two] and gamemap[i][j+two] == gamemap[i][j+three]):
                 return 'j'
-        except:
-            pass
     return False
-def popcandy(gamemap,i,j,returned,satr,soton,makecandies = True):
-    lort = False
-    color = gamemap[i][j]
-    explored = [[i,j]]
-    if returned == 'i':
-        higher = i
-        lower = i
-    elif returned == 'j':
-        higher = j
-        lower = j
-    else:
-        raise ValueError('unviable candy was given to popcandy')
-    if returned == 'i':
-        while higher != False and higher <satr-1:
-            if gamemap[i+1][j] == color:
-                higher = i+1
-                explored.append([i+1,j])
-            else:
-                higher = False
-        while lower != False  and 0 < lower:
-            if gamemap[i-1][j] == color:
-                lower = i-1
-                explored.append([i-1,j])
-            else:
-                lower = False
-    else:
-        while higher != False and higher <soton-1:
-            if gamemap[i][j+1] == color:
-                higher = j+1
-                explored.append([i,j+1])
-            else:
-                higher = False
-        while lower != False  and 0 < lower:
-            if gamemap[i][j-1] == color:
-                lower = j-1
-                explored.append([i,j-1])
-            else:
-                lower = False
-    if returned == 'i':
-        for one , two in [[-2,-1],[-1,1],[1,2]]:
-            try:
-                if gamemap[higher][j+one] == color and gamemap[higher][j+two] == color:
-                    explored.append([higher,j+one])
-                    explored.append([higher,j+two])
-                    lort = True
-                    break
-            except:
-                pass
-    elif returned == 'j':
-        for one , two in [[-2,-1],[-1,1],[1,2]]:
-            try:
-                if gamemap[i+one][higher] == color and gamemap[i+two][higher] == color:
-                    explored.append([i+one,higher])
-                    explored.append([i+two,higher])
-                    lort = True
-                    break
-            except:
-                pass
-    for k,l in explored:
-        gamemap[k][l] = 'poped'
-    if makecandies:
-        target = random.choice(explored)
-        if lort:
-            gamemap[target[0]][target[1]] = 'bomb'
-        elif len(explored) >= 5:
-            gamemap[target[0]][target[1]] = 'rainbow'
-        elif len(explored) == 4:
-            gamemap[target[0]][target[1]] = 'satrsoton'
+def popcandy(gamemap,i,j,returned,satr,soton,makecandies = True , satrsoton = '',swapedwith = ''):
+    if gamemap[i][j] != 'bomb' and gamemap[i][j] != 'rainbow' and gamemap[i][j] != 'satrsoton':
+        lort = False
+        color = gamemap[i][j]
+        explored = [[i,j]]
+        if returned == 'i':
+            higher = i
+            lower = i
+        elif returned == 'j':
+            higher = j
+            lower = j
+        else:
+            raise ValueError('unviable candy was given to popcandy')
+        if returned == 'i':
+            while higher != False and higher <satr-1:
+                if gamemap[i+1][j] == color:
+                    higher = i+1
+                    explored.append([i+1,j])
+                else:
+                    higher = False
+            while lower != False  and 0 < lower:
+                if gamemap[i-1][j] == color:
+                    lower = i-1
+                    explored.append([i-1,j])
+                else:
+                    lower = False
+        else:
+            while higher != False and higher <soton-1:
+                if gamemap[i][j+1] == color:
+                    higher = j+1
+                    explored.append([i,j+1])
+                else:
+                    higher = False
+            while lower != False  and 0 < lower:
+                if gamemap[i][j-1] == color:
+                    lower = j-1
+                    explored.append([i,j-1])
+                else:
+                    lower = False
+        if returned == 'i':
+            for one , two in [[-2,-1],[-1,1],[1,2]]:
+                try:
+                    if gamemap[higher][j+one] == color and gamemap[higher][j+two] == color:
+                        explored.append([higher,j+one])
+                        explored.append([higher,j+two])
+                        lort = True
+                        break
+                except:
+                    pass
+        elif returned == 'j':
+            for one , two in [[-2,-1],[-1,1],[1,2]]:
+                try:
+                    if gamemap[i+one][higher] == color and gamemap[i+two][higher] == color:
+                        explored.append([i+one,higher])
+                        explored.append([i+two,higher])
+                        lort = True
+                        break
+                except:
+                    pass
+        for k,l in explored:
+            gamemap[k][l] = 'poped'
+        if makecandies:
+            target = random.choice(explored)
+            if lort:
+                gamemap[target[0]][target[1]] = 'bomb'
+            elif len(explored) >= 5:
+                gamemap[target[0]][target[1]] = 'rainbow'
+            elif len(explored) == 4:
+                gamemap[target[0]][target[1]] = 'satrsoton'
+    elif gamemap[i][j] == 'bomb':
+        for k in [-1,0,1]:
+            for l in [-1,0,1]:
+                try:
+                    gamemap[i+k][j+l] = 'poped'
+                except:
+                    pass
+    elif gamemap[i][j] == 'satrsoton':
+        ...
+    elif gamemap[i][j] == 'rainbow':
+        ...
     return gamemap
+def candyfill(gamemap,i,j):
+    counter = {'r':0,'o':0,'y':0,'g':0,'b':0,'p':0}
+    for k,l in [[i,j-1],[i,j+1],[i-1,j],[i+1,j]]:
+            try:
+                if gamemap[k][l] in counter:
+                    counter[gamemap[k][l]] += 1
+            except:
+                pass
+    choices = []
+    for color in counter:
+        if counter[color] < 1:
+            choices.append(color)
+    return random.choice(choices)
 if __name__ == '__main__':
     main()
