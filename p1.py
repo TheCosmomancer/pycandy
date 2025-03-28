@@ -133,13 +133,9 @@ def main():
             for i in range(satr):
                 for j in range(soton):
                     if (i,j) not in empty:
-                        gamemap[i][j] = random.choice(candies)
+                        gamemap[i][j] = candyfill(gamemap,i,j)
                     else:
                         gamemap[i][j] = 'blocked'
-            for i in range(satr):
-                for j in range(soton):
-                    if (i,j) not in empty:
-                        gamemap[i][j] = candyfill(gamemap,i,j)
             amodimult = 720//satr
             ofoghimult = 600//soton
             selected1 = []
@@ -158,28 +154,27 @@ def main():
                 difi = abs(selected1[0]-selected2[0])
                 difj = abs(selected1[1]-selected2[1])
                 if (difi == 0 and difj == 1) or (difi == 1 and difj == 0):
-                    copygamemap = gamemap
-                    temp = copygamemap[selected1[0]][selected1[1]]
-                    copygamemap[selected1[0]][selected1[1]] = copygamemap[selected2[0]][selected2[1]]
-                    copygamemap[selected2[0]][selected2[1]] = temp
                     flag = False
-                    returned1 = viableswap(copygamemap, selected2[0], selected2[1],satr,soton)
-                    returned2 = viableswap(copygamemap, selected1[0], selected1[1],satr,soton)
-                    """"if (copygamemap[selected1[0]][selected1[1]] == 'satrsoton' or copygamemap[selected1[0]][selected1[1]] == 'bomb' or copygamemap[selected1[0]][selected1[1]] == 'rainbow' or returned1 != False) and (copygamemap[selected2[0]][selected2[1]] == 'bomb' or copygamemap[selected2[0]][selected2[1]] == 'rainbow' or copygamemap[selected2[0]][selected2[1]] == 'satrsoton' or returned2 != False):
-                        flag = '12'
-                    elif (copygamemap[selected1[0]][selected1[1]] == 'satrsoton' or copygamemap[selected1[0]][selected1[1]] == 'bomb' or copygamemap[selected1[0]][selected1[1]] == 'rainbow' or returned1 != False):
+                    returned = viableswap(gamemap, selected1, selected2,satr,soton)
+                    if (gamemap[selected1[0]][selected1[1]] == 'satrsoton' or gamemap[selected1[0]][selected1[1]] == 'bomb' or gamemap[selected1[0]][selected1[1]] == 'rainbow'):
                         flag = '1'
-                    elif (copygamemap[selected2[0]][selected2[1]] == 'bomb' or copygamemap[selected2[0]][selected2[1]] == 'rainbow' or copygamemap[selected2[0]][selected2[1]] == 'satrsoton' or returned2 != False):
+                    elif (gamemap[selected2[0]][selected2[1]] == 'bomb' or gamemap[selected2[0]][selected2[1]] == 'rainbow' or gamemap[selected2[0]][selected2[1]] == 'satrsoton'):
                         flag = '2'
-                    if flag == '12':
-                        copygamemap = popcandy(copygamemap, i, j, returned1, satr, soton)
-                        copygamemap = popcandy(copygamemap, i, j, returned2, satr, soton)
-                    elif flag == '1':
-                        copygamemap = popcandy(copygamemap, i, j, returned1, satr, soton)
-                    elif flag == '2':
-                        copygamemap = popcandy(copygamemap, i, j, returned2, satr, soton)"""
-                    if returned1 != False or returned2 != False:
-                        gamemap = copygamemap
+                    elif returned[0] != False and returned[1] != False:
+                        flag = '12'
+                    elif returned [0] != False:
+                        flag = '1'
+                    elif returned[1] != False:
+                       flag = '2'
+                    if flag != False:
+                        gamemap[selected1[0]][selected1[1]] , gamemap[selected2[0]][selected2[1]] = gamemap[selected2[0]][selected2[1]] , gamemap[selected1[0]][selected1[1]]
+                        if flag == '12':
+                            gamemap = popcandy(gamemap, i, j, returned[0], satr, soton)
+                            gamemap = popcandy(gamemap, i, j, returned[1], satr, soton)
+                        elif flag == '1':
+                            gamemap = popcandy(gamemap, i, j, returned[0], satr, soton)
+                        elif flag == '2':
+                            gamemap = popcandy(gamemap, i, j, returned[1], satr, soton)
                 selected1 = []
                 selected2 = []
                 gamephasephase = 0
@@ -258,17 +253,25 @@ def main():
         dt = clock.tick(60) / 1000
 
     pygame.quit()
-def viableswap(gamemap,i,j,satr,soton):
+def viableswap(gamemap,sel1,sel2,satr,soton):
     lis = [[-2,-1,0],[-1,0,1],[0,1,2]]
-    for r in range(3):
-        one, two, three = lis[r]
-        if i+one >=0 and i+three <satr:
-            if (gamemap[i+one][j] == gamemap[i+two][j] and gamemap[i+two][j] == gamemap[i+three][j]):
-                return 'i'
-        if j+one >=0 and j+three <soton:
-            if (gamemap[i][j+one] == gamemap[i][j+two] and gamemap[i][j+two] == gamemap[i][j+three]):
-                return 'j'
-    return False
+    lis2 = [[sel2[0],sel2[1]],[sel1[0],sel1[1]]]
+    ret = [False,False]
+    gmmap = list()
+    for bir in range(satr):
+        gmmap.append([addaad for addaad in gamemap[bir]])
+    gmmap[sel1[0]][sel1[1]] , gmmap[sel2[0]][sel2[1]] = gmmap[sel2[0]][sel2[1]] , gmmap[sel1[0]][sel1[1]]
+    for n in  range(2):
+        i , j = lis2[n]
+        for r in range(3):
+            one, two, three = lis[r]
+            if i+one >=0 and i+three <satr:
+                if (gmmap[i+one][j] == gmmap[i+two][j] and gmmap[i+two][j] == gmmap[i+three][j]):
+                    ret[n] = 'i'
+            if j+one >=0 and j+three <soton:
+                if (gmmap[i][j+one] == gmmap[i][j+two] and gmmap[i][j+two] == gmmap[i][j+three]):
+                    ret[n] = 'j'
+    return ret
 def popcandy(gamemap,i,j,returned,satr,soton,makecandies = True , satrsoton = '',swapedwith = ''):
     if gamemap[i][j] != 'bomb' and gamemap[i][j] != 'rainbow' and gamemap[i][j] != 'satrsoton':
         lort = False
