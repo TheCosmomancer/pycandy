@@ -175,6 +175,11 @@ def main():
                             gamemap = popcandy(gamemap, i, j, returned[0], satr, soton)
                         elif flag == '2':
                             gamemap = popcandy(gamemap, i, j, returned[1], satr, soton)
+                        for temp1 in range (satr) :
+                            for temp2 in range (soton):
+                                if gamemap[temp1][temp2] == 'poped' and refills > 0:
+                                    gamemap[temp1][temp2] = candyfill(gamemap,temp1,temp2)
+                                    refills -= 1
                 selected1 = []
                 selected2 = []
                 gamephasephase = 0
@@ -287,28 +292,28 @@ def popcandy(gamemap,i,j,returned,satr,soton,makecandies = True , satrsoton = ''
             raise ValueError('unviable candy was given to popcandy')
         if returned == 'i':
             while higher != False and higher <satr-1:
-                if gamemap[i+1][j] == color:
-                    higher = i+1
-                    explored.append([i+1,j])
+                if gamemap[higher+1][j] == color:
+                    higher += 1
+                    explored.append([higher,j])
                 else:
                     higher = False
             while lower != False  and 0 < lower:
-                if gamemap[i-1][j] == color:
-                    lower = i-1
-                    explored.append([i-1,j])
+                if gamemap[lower-1][j] == color:
+                    lower -= 1
+                    explored.append([lower,j])
                 else:
                     lower = False
         else:
             while higher != False and higher <soton-1:
-                if gamemap[i][j+1] == color:
-                    higher = j+1
-                    explored.append([i,j+1])
+                if gamemap[i][higher+1] == color:
+                    higher += 1
+                    explored.append([i,higher])
                 else:
                     higher = False
             while lower != False  and 0 < lower:
-                if gamemap[i][j-1] == color:
-                    lower = j-1
-                    explored.append([i,j-1])
+                if gamemap[i][lower-1] == color:
+                    lower -= 1
+                    explored.append([i,lower])
                 else:
                     lower = False
         if returned == 'i':
@@ -317,6 +322,14 @@ def popcandy(gamemap,i,j,returned,satr,soton,makecandies = True , satrsoton = ''
                     if gamemap[higher][j+one] == color and gamemap[higher][j+two] == color:
                         explored.append([higher,j+one])
                         explored.append([higher,j+two])
+                        lort = True
+                        break
+                except:
+                    pass
+                try:
+                    if gamemap[lower][j+one] == color and gamemap[lower][j+two] == color:
+                        explored.append([lower,j+one])
+                        explored.append([lower,j+two])
                         lort = True
                         break
                 except:
@@ -331,7 +344,17 @@ def popcandy(gamemap,i,j,returned,satr,soton,makecandies = True , satrsoton = ''
                         break
                 except:
                     pass
-        for k,l in explored:
+                try:
+                    if gamemap[i+one][lower] == color and gamemap[i+two][lower] == color:
+                        explored.append([i+one,lower])
+                        explored.append([i+two,lower])
+                        lort = True
+                        break
+                except:
+                    pass
+        for tile in explored:
+            k = tile[0]
+            l = tile[1]
             gamemap[k][l] = 'poped'
         if makecandies:
             target = random.choice(explored)
@@ -349,9 +372,17 @@ def popcandy(gamemap,i,j,returned,satr,soton,makecandies = True , satrsoton = ''
                 except:
                     pass
     elif gamemap[i][j] == 'satrsoton':
-        ...
+        if satrsoton == 'satr':
+            for temp2 in range(soton):
+                gamemap[i][temp2] == 'poped'
+        elif satrsoton == 'soton':
+            for temp1 in range(satr):
+                gamemap[temp1][j] = 'poped'
     elif gamemap[i][j] == 'rainbow':
-        ...
+        for temp1 in range(satr):
+            for temp2 in range(soton):
+                if gamemap[temp1][temp2] == swapedwith:
+                    gamemap[temp1][temp2] = 'poped'
     return gamemap
 def candyfill(gamemap,i,j):
     counter = {'r':0,'o':0,'y':0,'g':0,'b':0,'p':0}
