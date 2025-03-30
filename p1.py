@@ -169,12 +169,12 @@ def main():
                     if flag != False:
                         gamemap[selected1[0]][selected1[1]] , gamemap[selected2[0]][selected2[1]] = gamemap[selected2[0]][selected2[1]] , gamemap[selected1[0]][selected1[1]]
                         if flag == '12':
-                            gamemap = popcandy(gamemap, i, j, returned[0], satr, soton)
-                            gamemap = popcandy(gamemap, i, j, returned[1], satr, soton)
+                            gamemap = popcandy(gamemap, selected2[0],selected2[1], returned[0], satr, soton)
+                            gamemap = popcandy(gamemap, selected1[0],selected1[1], returned[1], satr, soton)
                         elif flag == '1':
-                            gamemap = popcandy(gamemap, i, j, returned[0], satr, soton)
+                            gamemap = popcandy(gamemap, selected2[0],selected2[1], returned[0], satr, soton)
                         elif flag == '2':
-                            gamemap = popcandy(gamemap, i, j, returned[1], satr, soton)
+                            gamemap = popcandy(gamemap, selected1[0],selected1[1], returned[1], satr, soton)
                         for temp1 in range (satr) :
                             for temp2 in range (soton):
                                 if gamemap[temp1][temp2] == 'poped' and refills > 0:
