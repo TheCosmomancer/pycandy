@@ -395,7 +395,7 @@ def popcandy(gamemap,i,j,returned,satr,soton,makecandies = True , satrsoton = ''
     elif gamemap[i][j] == 'satrsoton':
         if satrsoton == 'satr':
             for temp2 in range(soton):
-                gamemap[i][temp2] == 'poped'
+                gamemap[i][temp2] = 'poped'
         else:
             for temp1 in range(satr):
                 gamemap[temp1][j] = 'poped'
