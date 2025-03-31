@@ -133,7 +133,7 @@ def main():
             for i in range(satr):
                 for j in range(soton):
                     if (i,j) not in empty:
-                        gamemap[i][j] = candyfill(gamemap,i,j)
+                        gamemap = candyfill(gamemap,i,j)
                     else:
                         gamemap[i][j] = 'blocked'
             amodimult = 720//satr
@@ -175,11 +175,12 @@ def main():
                             gamemap = popcandy(gamemap, selected2[0],selected2[1], returned[0], satr, soton)
                         elif flag == '2':
                             gamemap = popcandy(gamemap, selected1[0],selected1[1], returned[1], satr, soton)
-                        for temp1 in range (satr) :
-                            for temp2 in range (soton):
-                                if gamemap[temp1][temp2] == 'poped' and refills > 0:
-                                    gamemap[temp1][temp2] = candyfill(gamemap,temp1,temp2)
-                                    refills -= 1
+                        for temp1 in range (satr):
+                            for temp2 in range (soton) :
+                                if gamemap[temp1][temp2] == 'poped':
+                                    gamemap = candyfill(gamemap,temp1,temp2,refills)
+                                    if refills > 0:
+                                        refills -= 1
                 selected1 = []
                 selected2 = []
                 gamephasephase = 0
@@ -244,6 +245,12 @@ def main():
                         color = 'orange'
                     elif gamemap[i][j] == 'g':
                         color = 'green'
+                    elif gamemap[i][j] == 'bomb':
+                        color = 'grey'
+                    elif gamemap[i][j] == 'rainbow':
+                        color = 'pink'
+                    elif gamemap[i][j] == 'satrsoton':
+                        color = 'teal'
                     else:
                         color = 'black'
                     pygame.draw.circle(screen,color,(120 + ((j+0.5)*ofoghimult),(i+0.5)*amodimult),r,500)
@@ -384,18 +391,28 @@ def popcandy(gamemap,i,j,returned,satr,soton,makecandies = True , satrsoton = ''
                 if gamemap[temp1][temp2] == swapedwith:
                     gamemap[temp1][temp2] = 'poped'
     return gamemap
-def candyfill(gamemap,i,j):
-    counter = {'r':0,'o':0,'y':0,'g':0,'b':0,'p':0}
-    for k,l in [[i,j-1],[i,j+1],[i-1,j],[i+1,j]]:
-            try:
-                if gamemap[k][l] in counter:
-                    counter[gamemap[k][l]] += 1
-            except:
-                pass
-    choices = []
-    for color in counter:
-        if counter[color] < 1:
-            choices.append(color)
-    return random.choice(choices)
+def candyfill(gamemap,i,j,refills = -1):
+    for temp in range(i-1,-1,-1):
+        if gamemap[temp][j] !='poped' and gamemap[temp][j] !='blocked':
+            gamemap[temp][j],gamemap[i][j] = gamemap[i][j] , gamemap[temp][j]
+            i = temp
+        else:
+            break
+    if refills > 0 or refills == -1 :
+        counter = {'r':0,'o':0,'y':0,'g':0,'b':0,'p':0}
+        for k,l in [[i,j-1],[i,j+1],[i,j-2],[i,j+2],[i-1,j],[i+1,j],[i-2,j],[i+2,j]]:
+                try:
+                    if gamemap[k][l] in counter:
+                        counter[gamemap[k][l]] += 1
+                except:
+                    pass
+        choices = []
+        for color in counter:
+            if counter[color] < 2:
+                choices.append(color)
+                if counter[color] == 1:
+                    choices.append(color)
+        gamemap[i][j] = random.choice(choices)
+    return gamemap
 if __name__ == '__main__':
     main()
