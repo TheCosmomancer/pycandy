@@ -172,9 +172,25 @@ def main():
                             gamemap = popcandy(gamemap, selected2[0],selected2[1], returned[0], satr, soton)
                             gamemap = popcandy(gamemap, selected1[0],selected1[1], returned[1], satr, soton)
                         elif flag == '1':
-                            gamemap = popcandy(gamemap, selected2[0],selected2[1], returned[0], satr, soton)
+                            if gamemap[selected2[0]][selected2[1]] == 'rainbow':
+                                gamemap = popcandy(gamemap, selected2[0],selected2[1], returned[0], satr, soton,makecandies = False,swapedwith=gamemap[selected1[0]][selected1[1]])
+                            elif gamemap[selected2[0]][selected2[1]] == 'satrsoton':
+                                if (selected1[0]-selected2[0]) == 0:
+                                    gamemap = popcandy(gamemap, selected2[0],selected2[1], returned[0], satr, soton,satrsoton='satr')
+                                else:
+                                    gamemap = popcandy(gamemap, selected2[0],selected2[1], returned[0], satr, soton,satrsoton='soton')
+                            else:
+                                gamemap = popcandy(gamemap, selected2[0],selected2[1], returned[0], satr, soton)
                         elif flag == '2':
-                            gamemap = popcandy(gamemap, selected1[0],selected1[1], returned[1], satr, soton)
+                            if gamemap[selected1[0]][selected1[1]] == 'rainbow':
+                                gamemap = popcandy(gamemap, selected1[0],selected1[1], returned[0], satr, soton,makecandies = False,swapedwith=gamemap[selected2[0]][selected2[1]])
+                            elif gamemap[selected1[0]][selected1[1]] == 'satrsoton':
+                                if (selected1[0]-selected2[0]) == 0:
+                                    gamemap = popcandy(gamemap, selected1[0],selected1[1], returned[0], satr, soton,satrsoton='satr')
+                                else:
+                                    gamemap = popcandy(gamemap, selected1[0],selected1[1], returned[0], satr, soton,satrsoton='soton')
+                            else:
+                                gamemap = popcandy(gamemap, selected1[0],selected1[1], returned[1], satr, soton)
                         for temp1 in range (satr):
                             for temp2 in range (soton) :
                                 if gamemap[temp1][temp2] == 'poped':
@@ -374,18 +390,17 @@ def popcandy(gamemap,i,j,returned,satr,soton,makecandies = True , satrsoton = ''
     elif gamemap[i][j] == 'bomb':
         for k in [-1,0,1]:
             for l in [-1,0,1]:
-                try:
+                if 0 <= i+k < satr and 0 <= j+l <soton:
                     gamemap[i+k][j+l] = 'poped'
-                except:
-                    pass
     elif gamemap[i][j] == 'satrsoton':
         if satrsoton == 'satr':
             for temp2 in range(soton):
                 gamemap[i][temp2] == 'poped'
-        elif satrsoton == 'soton':
+        else:
             for temp1 in range(satr):
                 gamemap[temp1][j] = 'poped'
     elif gamemap[i][j] == 'rainbow':
+        gamemap[i][j] = 'poped'
         for temp1 in range(satr):
             for temp2 in range(soton):
                 if gamemap[temp1][temp2] == swapedwith:
