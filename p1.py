@@ -16,9 +16,9 @@ def main():
     inp = ''
     gamemap = list()
     refills = 0
-    empty = set()
-    protected = set()
-    tempset = set()
+    empty = list()
+    protected = list()
+    tempset = list()
     candies = ['r','o','y','g','b','p'] #for red, orange, yellow,green,blue and purple respetively
     # pint , teal and white
     held = False
@@ -51,12 +51,12 @@ def main():
                         gamephasephase = 2
                     elif gamephasephase == 2 and not held:
                         empty = tempset
-                        tempset = set()
+                        tempset = list()
                         inp = ''
                         gamephasephase = 3
                     elif gamephasephase == 3 and not held:
                         protected = tempset
-                        tempset = set()
+                        tempset = list()
                         inp = ''
                         gamephasephase = 4
                     elif gamephasephase == 4 and not held:
@@ -71,7 +71,7 @@ def main():
                     inp[0] = int(inp[0])
                     inp[1] = int(inp[1])
                     if 0 < int(inp[0]) <= satr and 0 < int(inp[1]) <= soton:
-                        tempset.add((inp[0]-1,inp[1]-1))
+                        tempset.append([inp[0]-1,inp[1]-1])
                     inp = ''
                 held = True
             elif keys[pygame.K_0] or keys[pygame.K_KP0]:
@@ -132,7 +132,7 @@ def main():
                 gamemap.append(['generated' for j in range(soton)])
             for i in range(satr):
                 for j in range(soton):
-                    if (i,j) not in empty:
+                    if [i,j] not in empty:
                         gamemap = candyfill(gamemap,i,j)
                     else:
                         gamemap[i][j] = 'blocked'
@@ -146,10 +146,16 @@ def main():
                 if mousepos[0] >= 120 and not held :
                     if gamephasephase == 0:
                         selected1 = [(mousepos[1])//amodimult,(mousepos[0]-120)//ofoghimult]
-                        gamephasephase = 1
+                        if selected1 not in empty and selected1 not in protected:
+                            gamephasephase = 1
+                        else:
+                            selected1 = []
                     else:
                         selected2 = [(mousepos[1])//amodimult,(mousepos[0]-120)//ofoghimult]
-                        gamephasephase = 2
+                        if selected2 not in empty and selected1 not in protected:
+                            gamephasephase = 2
+                        else:
+                            selected2 = []
             elif gamephasephase == 2:
                 difi = abs(selected1[0]-selected2[0])
                 difj = abs(selected1[1]-selected2[1])
@@ -194,6 +200,13 @@ def main():
                         for temp1 in range (satr):
                             for temp2 in range (soton) :
                                 if gamemap[temp1][temp2] == 'poped':
+                                    if [temp1,temp2] in protected:
+                                        protected.remove([temp1,temp2])
+                                    else:
+                                        for bir in [-1,0,1]:
+                                            for iki in [-1,0,1]:
+                                                if 0<=temp1+bir<satr and 0<=temp2+iki<soton and [temp1+bir,temp2+iki] in protected:
+                                                    protected.remove([temp1+bir,temp2+iki])
                                     gamemap = candyfill(gamemap,temp1,temp2,refills)
                                     if refills > 0:
                                         refills -= 1
@@ -249,6 +262,8 @@ def main():
                 pygame.draw.rect(screen,'white',[(selected1[1]*ofoghimult)+120,selected1[0]*amodimult,ofoghimult,amodimult],500)
             for i in range(satr):
                 for j in range(soton):
+                    if [i,j] in protected:
+                        pygame.draw.rect(screen,'white',[(j*ofoghimult)+120,i*amodimult,ofoghimult,amodimult],500)
                     if gamemap[i][j] == 'r':
                         color = 'red'
                     elif gamemap[i][j] == 'b':
