@@ -16,6 +16,8 @@ def main():
     inp = ''
     gamemap = list()
     refills = 0
+    score = 0
+    rerolls = 3
     empty = list()
     protected = list()
     tempset = list()
@@ -156,6 +158,18 @@ def main():
                             gamephasephase = 2
                         else:
                             selected2 = []
+                elif gamephasephase == 0 and not held:
+                    if 20<=mousepos[0]<=120:
+                        gamephasephase = 'save'
+                    elif 130<=mousepos[0]<=210:
+                        if refills > 0:
+                            gamephasephase = 'reroll'
+                    elif 240<=mousepos[0]<=360:
+                        if score >= satr*soton:
+                            gamephasephase = 'changecolor'
+                    elif 390<=mousepos[0]<=480:
+                        if score >= satr*soton*2:
+                            gamephasephase = 'swap'
             elif gamephasephase == 2:
                 difi = abs(selected1[0]-selected2[0])
                 difj = abs(selected1[1]-selected2[1])
@@ -200,6 +214,7 @@ def main():
                         for temp1 in range (satr):
                             for temp2 in range (soton) :
                                 if gamemap[temp1][temp2] == 'poped':
+                                    score += 1
                                     if [temp1,temp2] in protected:
                                         protected.remove([temp1,temp2])
                                     else:
@@ -213,6 +228,23 @@ def main():
                 selected1 = []
                 selected2 = []
                 gamephasephase = 0
+            elif gamephasephase == 'save':
+                ...
+            elif gamephasephase == 'reroll':
+                for i in range(satr):
+                    for j in range(soton):
+                        if [i,j] not in empty:
+                            gamemap = candyfill(gamemap,i,j)
+                refills -= 1
+                gamephasephase = 0
+            elif gamephasephase == 'changecolor' and not held and mousepos[0] >= 120:
+                colorselect = [(mousepos[1])//amodimult,(mousepos[0]-120)//ofoghimult]
+                if colorselect not in empty:
+                    gamephasephase = 'pickcolor'
+            elif gamephasephase == 'pickcolor' and not held:
+                ...
+            elif gamephasephase == 'swap':
+                ...
             if mouse[0] == True:
                    held = True
             elif mouse[0] == False:
@@ -221,6 +253,7 @@ def main():
         screen.fill('black')
         font1 = pygame.font.SysFont(None, 70)
         font2 = pygame.font.SysFont(None, 50)
+        font3 = pygame.font.SysFont(None, 40)
         if gamescreen == 'menu':
             screen.blit(font1.render('Candy Pop!', True, "white"), (217, 50))
             #newgame
@@ -260,33 +293,47 @@ def main():
                 r = ofoghimult/2
             if selected1 != []:
                 pygame.draw.rect(screen,'white',[(selected1[1]*ofoghimult)+120,selected1[0]*amodimult,ofoghimult,amodimult],500)
-            for i in range(satr):
-                for j in range(soton):
-                    if [i,j] in protected:
-                        pygame.draw.rect(screen,'white',[(j*ofoghimult)+120,i*amodimult,ofoghimult,amodimult],500)
-                    if gamemap[i][j] == 'r':
-                        color = 'red'
-                    elif gamemap[i][j] == 'b':
-                        color = 'blue'
-                    elif gamemap[i][j] == 'y':
-                        color = 'yellow'
-                    elif gamemap[i][j] == 'p':
-                        color = 'purple'
-                    elif gamemap[i][j] == 'o':
-                        color = 'orange'
-                    elif gamemap[i][j] == 'g':
-                        color = 'green'
-                    elif gamemap[i][j] == 'bomb':
-                        color = 'grey'
-                    elif gamemap[i][j] == 'rainbow':
-                        color = 'pink'
-                    elif gamemap[i][j] == 'satrsoton':
-                        color = 'teal'
-                    else:
-                        color = 'black'
-                    pygame.draw.circle(screen,color,(120 + ((j+0.5)*ofoghimult),(i+0.5)*amodimult),r,500)
-            screen.blit(font1.render(f'({selected1})', True, "white"), (245, 200))
-            screen.blit(font1.render(f'({selected2})', True, "white"), (245, 400))
+            screen.blit(font2.render('save &', True, "white"), (10, 20))
+            screen.blit(font1.render('exit', True, "white"), (10, 50))
+            if gamephasephase == 0:
+                screen.blit(font3.render('refresh', True, "white"), (10, 130))
+                screen.blit(font2.render(f'{rerolls} left', True, "white"), (10, 160))
+                screen.blit(font3.render('change', True, "white"), (10, 240))
+                screen.blit(font2.render('color', True, "white"), (10, 270))
+                screen.blit(font2.render(f'-{satr*soton}', True, "white"), (10, 310))
+                screen.blit(font2.render('swap', True, "white"), (10, 390))
+                screen.blit(font2.render(f'-{satr*soton*2}', True, "white"), (10, 430))
+            if gamephasephase == 0 or gamephasephase == 1 or gamephasephase == 'changecolor':
+                for i in range(satr):
+                    for j in range(soton):
+                        if [i,j] in protected:
+                            pygame.draw.rect(screen,'white',[(j*ofoghimult)+120,i*amodimult,ofoghimult,amodimult],500)
+                        if gamemap[i][j] == 'r':
+                            color = 'red'
+                        elif gamemap[i][j] == 'b':
+                            color = 'blue'
+                        elif gamemap[i][j] == 'y':
+                            color = 'yellow'
+                        elif gamemap[i][j] == 'p':
+                            color = 'purple'
+                        elif gamemap[i][j] == 'o':
+                            color = 'orange'
+                        elif gamemap[i][j] == 'g':
+                            color = 'green'
+                        elif gamemap[i][j] == 'bomb':
+                            color = 'grey'
+                        elif gamemap[i][j] == 'rainbow':
+                            color = 'pink'
+                        elif gamemap[i][j] == 'satrsoton':
+                            color = 'teal'
+                        else:
+                            color = 'black'
+                        pygame.draw.circle(screen,color,(120 + ((j+0.5)*ofoghimult),(i+0.5)*amodimult),r,500)
+            if gamephasephase == 'pickcolor':
+                ...
+            # ... add time spent
+            screen.blit(font2.render('score:', True, "white"), (10, 620))
+            screen.blit(font1.render(f'{score}', True, "white"), (10, 660))
         # flip() the display to put your work on screen
         pygame.display.flip()
 
