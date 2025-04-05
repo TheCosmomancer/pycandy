@@ -160,26 +160,26 @@ def main():
         elif gamescreen == 'cont':
             with open('gamesave.txt','r') as file:
                 content = file.readlines()
-                satr = int(content[0])
-                soton = int(content[1])
+                satr = int(content[0].replace('\n',''))
+                soton = int(content[1].replace('\n',''))
                 temp = content[2]
-                temp = temp.replace('[','').replace(']','').replace(' ','')
+                temp = temp.replace('[','').replace(']','').replace(' ','').replace('\n','')
                 temp = temp.split(',')
                 templist = list()
                 for adaad in range (len(temp)//2):
                     templist.append([int(temp[adaad*2]),int(temp[(adaad*2)+1])])
                 empty = templist
                 temp = content[3]
-                temp = temp.replace('[','').replace(']','').replace(' ','')
+                temp = temp.replace('[','').replace(']','').replace(' ','').replace('\n','')
                 temp = temp.split(',')
                 templist = list()
                 for adaad in range (len(temp)//2):
                     templist.append([int(temp[adaad*2]),int(temp[(adaad*2)+1])])
                 protected = templist
-                refills = int(content[4])
-                score = int(content[5])
+                refills = int(content[4].replace('\n',''))
+                score = int(content[5].replace('\n',''))
                 temp = content[6]
-                temp = temp.replace('[','').replace(']','').replace(' ','').replace("'",'')
+                temp = temp.replace('[','').replace(']','').replace(' ','').replace("'",'').replace('\n','')
                 temp = temp.split(',')
                 templist = list()
                 for adaad in range (satr):
@@ -188,7 +188,7 @@ def main():
                         templistlist.append(temp[(adaad*satr)+adaad2])
                     templist.append(templistlist)
                 gamemap = templist
-                rerolls = int(content[7])
+                rerolls = int(content[7].replace('\n',''))
                 amodimult = 720//satr
                 ofoghimult = 600//soton 
                 selected1 = []
