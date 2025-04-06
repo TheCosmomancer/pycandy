@@ -280,10 +280,14 @@ def main():
                                                     if 0<=temp1+bir<satr and 0<=temp2+iki<soton and [temp1+bir,temp2+iki] in protected:
                                                         protected.remove([temp1+bir,temp2+iki])
                                         gamemap = candyfill(gamemap,temp1,temp2,refills)
-                                        if gamemap[temp1][temp2] == 'blocked':
-                                            empty.append([temp1,temp2])
                                         if refills > 0:
                                             refills -= 1
+                            for temp1 in range(satr):
+                                for temp2 in range(soton):
+                                    if gamemap[temp1][temp2] not in candies and gamemap[temp1][temp2] != 'satrsoton' and gamemap[temp1][temp2] != 'bomb' and gamemap[temp1][temp2] != 'rainbow':
+                                        gamemap[temp1][temp2] = 'blocked'
+                                    if gamemap[temp1][temp2] == 'blocked':
+                                        empty.append([temp1,temp2])
                 else:
                     returned = doesitpop(gamemap, [selected3[0],selected3[1]],satr,soton)
                     gamemap = popcandy(gamemap, selected3[0],selected3[1], returned , satr, soton)
@@ -299,10 +303,14 @@ def main():
                                                     if 0<=temp1+bir<satr and 0<=temp2+iki<soton and [temp1+bir,temp2+iki] in protected:
                                                         protected.remove([temp1+bir,temp2+iki])
                                         gamemap = candyfill(gamemap,temp1,temp2,refills)
-                                        if gamemap[temp1][temp2] == 'blocked':
-                                            empty.append([temp1,temp2])
                                         if refills > 0:
                                             refills -= 1
+                    for temp1 in range(satr):
+                        for temp2 in range(soton):
+                            if gamemap[temp1][temp2] not in candies and gamemap[temp1][temp2] != 'satrsoton' and gamemap[temp1][temp2] != 'bomb' and gamemap[temp1][temp2] != 'rainbow':
+                                gamemap[temp1][temp2] = 'blocked'
+                            if gamemap[temp1][temp2] == 'blocked':
+                                empty.append([temp1,temp2])
                 selected1 = []
                 selected2 = []
                 selected3 = []
@@ -370,7 +378,7 @@ def main():
                 for temp11 in range(satr):
                     for temp12 in range(soton):
                         for temp21,temp22 in [[-1,0],[1,0],[0,-1],[0,1]]:
-                            if 0 <= temp11+temp21 <satr and 0 <= temp12+temp22 <soton:
+                            if 0 <= temp11+temp21 <satr and 0 <= temp12+temp22 <soton and [temp11,temp12] not in empty and [temp11+temp21,temp12+temp22] not in empty:
                                 if viableswap(gamemap, [temp11,temp12], [temp11+temp21,temp12+temp22],satr,soton) != [False,False]:
                                     gameover = False
                             if gameover == False:
@@ -671,8 +679,7 @@ def candyfill(gamemap,i,j,refills = -1):
                 if counter[color] == 1:
                     choices.append(color)
         gamemap[i][j] = random.choice(choices)
-    else:
-        gamemap[i][j] = 'blocked'
     return gamemap
 if __name__ == '__main__':
     main()
+#...make every single empty space blocked so that refreshing dosent generate candies there and you cant swap there
