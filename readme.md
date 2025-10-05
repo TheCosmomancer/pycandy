@@ -43,4 +43,4 @@ python p1.py
 
 ---
 
-*written with AI.*
+*readme written with AI.*
